@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diagnostics preview</title>
+<style>
+  :root{--bg:#0b0d12;--text:#eef1f6;--muted:#8b93a3;--accent:#7c5cff;--border:#2b3140;--radius:14px}
+  body{margin:0;background:#07080c;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  /* the card of Minishop 3.8.1: the tab lives in the content area, other columns sit next to it */
+  .shell{display:flex;gap:0;max-width:100vw}
+  .side{flex:0 0 var(--side,0px)}
+  .content{flex:1 1 auto;min-width:0;padding:16px}
+</style>
+</head>
+<body>
+<div class="shell"><div class="side"></div><div class="content" id="app"></div></div>
+<script type="module">
+  const ago = (m) => new Date(Date.now() - m * 60000).toISOString();
+  const data = {
+    ok: true, generated_at: new Date().toISOString(),
+    warnings: [{ level: "warn", text: "Пользователь ни разу не подключался" }],
+    shop: { user_id: 4821, minishop_id: "ms_0123456789abcdef0123456789abcdef", telegram_id: 100200300, username: "demo_user", registered_at: ago(15 * 60) },
+    subscription: { tariff: null, active: true, end_date: new Date(Date.now() + 37 * 864e5).toISOString(), auto_renew: false, traffic_used: 0, traffic_limit: 0 },
+    panel: {
+      status: "ACTIVE", expire_at: new Date(Date.now() + 37 * 864e5).toISOString(), online_at: null, last_node: null, first_connected_at: null,
+      traffic_used: 0, traffic_limit: 0, traffic_lifetime: 0, squads: ["Trial_Iternal_Squad"],
+      accessible_nodes: [
+        { name: "Play2Go-NL-node", country: "NL", online: true, inbounds: ["NL_HYSTERIA2", "NL_HYSTERIA2_SALAMANDER", "NL_VLESS_XHTTP_REALITY"] },
+        { name: "Play2Go-Fin-node", country: "FI", online: true, inbounds: ["FIN_HYSTERIA2", "FIN_HYSTERIA2_SALAMANDER", "FIN_VLESS_XHTTP_REALITY"] },
+      ],
+      usage_week: [], usage_month: [], hwid_limit: 5,
+      devices: [
+        { platform: "Android", os: "16", model: "samsung SM-A346M", app: "INCY/3.7.0/android Dalvik/2.1.0", last_seen: ago(21) },
+        { platform: "Android", os: "16", model: "SM-A346M", app: "Happ/4.6.0/Android/17903223988441985597", last_seen: ago(24) },
+      ],
+      sub_requests: [
+        { at: ago(21), ip: "203.0.113.17", app: "Happ/4.6.0/Android/17903223988441985597" },
+        { at: ago(24), ip: "198.51.100.42", app: "Happ/4.6.0/Android/17903223988441985597" },
+        { at: ago(25), ip: "203.0.113.88", app: "Happ/4.6.0/Android/17903223988441985597" },
+        { at: ago(45), ip: "203.0.113.88", app: "INCY/3.7.0/android Dalvik/2.1.0" },
+      ],
+    },
+    payments: [],
+  };
+  const GB = 1024 ** 3;
+  // ?demo=rich: an invented active subscriber, used for the README screenshots
+  const rich = {
+    ok: true, generated_at: new Date().toISOString(),
+    warnings: [
+      { level: "warn", text: "Израсходовано больше 80% Premium-трафика" },
+      { level: "info", text: "Не подключался 4 дн." },
+    ],
+    shop: { user_id: 4821, minishop_id: "ms_0123456789abcdef0123456789abcdef", telegram_id: 100200300, username: "demo_user", registered_at: ago(60 * 24 * 41) },
+    subscription: {
+      tariff: "standard", active: true, end_date: new Date(Date.now() + 21 * 864e5).toISOString(), auto_renew: true,
+      traffic_used: 38.4 * GB, traffic_limit: 150 * GB, premium_used: 17.2 * GB, premium_limit: 20 * GB, premium_limited: true, premium_unlimited: false,
+    },
+    panel: {
+      status: "ACTIVE", expire_at: new Date(Date.now() + 21 * 864e5).toISOString(), online_at: ago(60 * 24 * 4), first_connected_at: ago(60 * 24 * 40),
+      last_node: { name: "Play2Go-NL-node", country: "NL", online: true },
+      traffic_used: 38.4 * GB, traffic_limit: 150 * GB, traffic_lifetime: 412 * GB, squads: ["Standard_Squad", "T-PremiumWL"], hwid_limit: 5,
+      accessible_nodes: [
+        { name: "Play2Go-NL-node", country: "NL", online: true, inbounds: ["NL_HYSTERIA2", "NL_VLESS_XHTTP_REALITY"] },
+        { name: "Play2Go-Fin-node", country: "FI", online: true, inbounds: ["FIN_HYSTERIA2", "FIN_VLESS_XHTTP_REALITY"] },
+        { name: "Play2Go-GE-WL-node", country: "DE", online: false, inbounds: ["NL_CDN"] },
+      ],
+      usage_week: [{ name: "Play2Go-NL-node", country: "NL", bytes: 14.8 * GB }, { name: "Play2Go-Fin-node", country: "FI", bytes: 4.1 * GB }],
+      usage_month: [{ name: "Play2Go-NL-node", country: "NL", bytes: 29.9 * GB }, { name: "Play2Go-Fin-node", country: "FI", bytes: 8.5 * GB }],
+      devices: [
+        { platform: "Android", os: "16", model: "Pixel 8", app: "Happ/4.6.0/Android", last_seen: ago(60 * 24 * 4) },
+        { platform: "iOS", os: "18.2", model: "iPhone 15", app: "Streisand/2.4.1", last_seen: ago(60 * 24 * 6) },
+        { platform: "Windows", os: "11", model: "Desktop", app: "v2rayN/7.1.3", last_seen: ago(60 * 24 * 9) },
+      ],
+      sub_requests: [
+        { at: ago(60 * 24 * 4), ip: "203.0.113.17", app: "Happ/4.6.0/Android" },
+        { at: ago(60 * 24 * 5), ip: "198.51.100.42", app: "Streisand/2.4.1" },
+        { at: ago(60 * 24 * 7), ip: "203.0.113.17", app: "Happ/4.6.0/Android" },
+        { at: ago(60 * 24 * 9), ip: "203.0.113.88", app: "v2rayN/7.1.3" },
+      ],
+    },
+    payments: [
+      { created_at: ago(60 * 24 * 10), amount: 149, currency: "RUB", provider: "yookassa", funding_source: "external", status: "succeeded" },
+      { created_at: ago(60 * 24 * 41), amount: 149, currency: "RUB", provider: "yookassa", funding_source: "external", status: "succeeded" },
+      { created_at: ago(60 * 24 * 41), amount: 30, currency: "RUB", provider: "balance", funding_source: "balance", status: "succeeded" },
+    ],
+  };
+  const chosen = new URLSearchParams(location.search).get("demo") === "rich" ? rich : data;
+  const realFetch = window.fetch.bind(window);
+  window.fetch = (url, opts) => String(url).startsWith("/api/admin/kiro-diagnostics")
+    ? Promise.resolve(new Response(JSON.stringify(chosen), { status: 200, headers: { "Content-Type": "application/json" } }))
+    : realFetch(url, opts);
+  const side = new URLSearchParams(location.search).get("side");
+  if (side) document.documentElement.style.setProperty("--side", side + "px");
+  const mod = await import("../frontend/index.js?" + Date.now());
+  mod.mountView("diagnostics", document.getElementById("app"), { user: { user_id: 1 }, active: true });
+</script>
+</body>
+</html>
