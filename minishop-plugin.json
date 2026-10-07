@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "artifact": "dist/kiro-diagnostics-1.0.0.zip",
-  "sha256": "f4287b9a8bac2a403fd0fd3b16bbb9cec2a42e0ed7cc8e96c2371c02a7b8192e",
-  "version": "1.0.0"
+  "artifact": "dist/kiro-diagnostics-1.0.1.zip",
+  "sha256": "7e91d49799b118b9fe39841c2fcaa644a9c591b9b7de9868caff072f4cdff2bb",
+  "version": "1.0.1"
 }

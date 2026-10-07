@@ -387,7 +387,7 @@ def _dumps(value: Any) -> str:
 
 class KiroDiagnosticsPlugin(Plugin):
     name = PLUGIN_ID
-    version = "1.0.0"
+    version = "1.0.1"
     plugin_api_min_version = 1
     plugin_api_max_version = 1
 

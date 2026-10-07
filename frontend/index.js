@@ -43,12 +43,13 @@ const bar = (used, limit) => {
 const row = (label, value) => `<div class="kd-row"><span class="kd-label">${esc(label)}</span><span class="kd-value">${value}</span></div>`;
 
 const STYLE = `
-.kd{display:flex;flex-direction:column;gap:12px;color:var(--text);font-size:14px}
-.kd-card{border:1px solid var(--border);border-radius:var(--radius,12px);padding:12px 14px;background:var(--bg)}
+.kd{display:flex;flex-direction:column;gap:12px;color:var(--text);font-size:14px;min-width:0;max-width:100%}
+.kd [data-body]{display:flex;flex-direction:column;gap:12px;min-width:0}
+.kd-card{border:1px solid var(--border);border-radius:var(--radius,12px);padding:12px 14px;background:var(--bg);min-width:0;overflow-x:auto}
 .kd-card h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
 .kd-row{display:flex;justify-content:space-between;gap:12px;padding:3px 0;align-items:center}
 .kd-label{color:var(--muted);flex-shrink:0}
-.kd-value{text-align:right;word-break:break-word}
+.kd-value{text-align:right;min-width:0;overflow-wrap:anywhere}
 .kd-muted{color:var(--muted)}
 .kd-warn-list{display:flex;flex-direction:column;gap:6px}
 .kd-w{padding:6px 10px;border-radius:8px;border-left:3px solid}
@@ -59,13 +60,16 @@ const STYLE = `
 .kd-bar{height:6px;border-radius:3px;background:rgba(127,127,127,.2);overflow:hidden;margin:4px 0}
 .kd-fill{height:100%}.kd-ok{background:#30a46c}.kd-warn{background:#f5a524}.kd-bad{background:#e5484d}
 .kd-table{width:100%;border-collapse:collapse;font-size:13px}
-.kd-table td,.kd-table th{padding:4px 6px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
-.kd-table th{color:var(--muted);font-weight:500}
+.kd-table td,.kd-table th{padding:4px 6px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top;overflow-wrap:anywhere}
+.kd-table th{color:var(--muted);font-weight:500;white-space:nowrap}
+.kd-nw{white-space:nowrap}
+.kd a{color:var(--accent)}
 .kd-tag{display:inline-block;padding:1px 6px;margin:1px;border-radius:6px;border:1px solid var(--border);font-size:12px}
 .kd-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .kd-btn{border:1px solid var(--border);background:transparent;color:var(--text);border-radius:8px;padding:4px 10px;cursor:pointer}
 .kd-btn:disabled{opacity:.5;cursor:default}
-.kd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.kd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px;min-width:0}
+.kd-grid>*{min-width:0}
 `;
 
 function render(data) {
@@ -124,7 +128,7 @@ function render(data) {
 
     const history = (p.sub_requests || []).length
       ? `<table class="kd-table"><tr><th>Когда</th><th>IP</th><th>Приложение</th></tr>${p.sub_requests
-          .map((h) => `<tr><td>${when(h.at)}</td><td>${esc(h.ip || "—")}</td><td>${esc(h.app || "—")}</td></tr>`)
+          .map((h) => `<tr><td>${when(h.at)}</td><td class="kd-nw">${esc(h.ip || "—")}</td><td>${esc(h.app || "—")}</td></tr>`)
           .join("")}</table>`
       : `<span class="kd-muted">Запросов не было</span>`;
 
@@ -137,7 +141,7 @@ function render(data) {
 
   const payments = (data.payments || []).length
     ? `<table class="kd-table"><tr><th>Дата</th><th>Сумма</th><th>Статус</th></tr>${data.payments
-        .map((x) => `<tr><td>${when(x.created_at)}</td><td>${esc(x.amount)} ${esc(x.currency)}<br><span class="kd-muted">${esc(x.provider)}${x.funding_source && x.funding_source !== "external" ? " · " + esc(x.funding_source) : ""}</span></td><td>${esc(x.status)}</td></tr>`)
+        .map((x) => `<tr><td>${when(x.created_at)}</td><td>${esc(x.amount)} ${esc(x.currency)}<br><span class="kd-muted">${esc(x.provider)}${x.funding_source && x.funding_source !== "external" ? " · " + esc(x.funding_source) : ""}</span></td><td class="kd-nw">${esc(x.status)}</td></tr>`)
         .join("")}</table>`
     : `<span class="kd-muted">Платежей нет</span>`;
 
