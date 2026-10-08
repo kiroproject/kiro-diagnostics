@@ -1,5 +1,8 @@
 # KIRO Diagnostics — диагностика пользователя для Remnawave Minishop
 
+> [!TIP]
+> **Плагин работает в [MARMELAD VPN](https://app.kiroproject.online/?campaign=gh_diag&utm_source=github&utm_medium=readme&utm_campaign=kiro-diagnostics).** Посмотрите сам сервис в Telegram-боте [@marmeladki_app_bot](https://t.me/marmeladki_app_bot?start=gh_diag).
+
 [![KIRO Diagnostics](docs/cover.webp)](docs/cover.webp)
 
 **KIRO Diagnostics** — плагин для [Remnawave Minishop](https://github.com/3252a8/remnawave-minishop): вкладка **«Диагностика»** в карточке пользователя в админке. Одним экраном показывает всё, что нужно поддержке, чтобы понять, почему у клиента «не работает VPN»: подписку и трафик в магазине, статус в панели Remnawave, доступные ноды и инбаунды, устройства, последние запросы подписки и платежи. Рядом сразу подсвечиваются найденные проблемы.
