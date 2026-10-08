@@ -28,12 +28,6 @@
 
 [![Вкладка «Диагностика»](docs/screenshots/user-card.webp)](docs/screenshots/user-card.webp)
 
-| Подсказки, магазин и панель Remnawave | На телефоне |
-| :---: | :---: |
-| <img src="docs/screenshots/warnings-and-shop.webp" width="520" alt="Подсказки, магазин и панель Remnawave"> | <img src="docs/screenshots/mobile.webp" width="260" alt="Мобильная вёрстка"> |
-
-На скриншотах вымышленный пользователь.
-
 ## Что проверяет плагин
 
 | Уровень | Проверка |
