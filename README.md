@@ -9,7 +9,11 @@
 
 Версия **1.0.1** · публикатор `kiroproject` · Minishop **3.8.0 и новее** (Plugin API v1, проверено на 3.8.0 и 3.8.1)
 
-[![MARMELAD VPN: Telegram-бот и мини-приложение](docs/marmelad-banner.gif)](https://t.me/marmeladki_app_bot?start=gh_diag)
+<p align="center">
+  <a href="https://t.me/marmeladki_app_bot?start=gh_diag">
+    <img src="docs/marmelad-banner.gif" alt="MARMELAD VPN: Telegram-бот и мини-приложение" width="100%">
+  </a>
+</p>
 
 ## Возможности
 
