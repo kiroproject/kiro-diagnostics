@@ -24,10 +24,6 @@
 
 [![Обзор](docs/overview.webp)](docs/overview.webp)
 
-**Карточка пользователя (десктоп)**
-
-[![Вкладка «Диагностика»](docs/screenshots/user-card.webp)](docs/screenshots/user-card.webp)
-
 ## Что проверяет плагин
 
 | Уровень | Проверка |
