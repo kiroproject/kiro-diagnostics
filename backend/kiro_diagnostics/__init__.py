@@ -132,8 +132,10 @@ async def _load_panel(panel: Any, user_uuid: str) -> dict[str, Any]:
             "history",
             panel._request("GET", f"/users/{user_uuid}/subscription-request-history"),
         ),
+        _panel_call("hosts", panel._request("GET", "/hosts")),
+        _panel_call("squads", panel._request("GET", "/internal-squads")),
     )
-    user, devices, bw_month, bw_week, nodes, accessible, history = results
+    user, devices, bw_month, bw_week, nodes, accessible, history, hosts, squads = results
     return {
         "user": user,
         "devices": devices,
@@ -142,7 +144,91 @@ async def _load_panel(panel: Any, user_uuid: str) -> dict[str, Any]:
         "nodes": _response(nodes),
         "accessible": _response(accessible),
         "history": _response(history),
+        "hosts": _list_from(_response(hosts), "hosts"),
+        "squads": _list_from(_response(squads), "internalSquads", "squads"),
     }
+
+
+def _list_from(value: Any, *keys: str) -> list[dict[str, Any]] | None:
+    """Panel lists come either bare or wrapped in an object; None means "no data"."""
+    if isinstance(value, dict):
+        for key in (*keys, "items", "data"):
+            if isinstance(value.get(key), list):
+                value = value[key]
+                break
+    if not isinstance(value, list):
+        return None
+    return [item for item in value if isinstance(item, dict)]
+
+
+def _host_rows(
+    hosts: list[dict[str, Any]] | None,
+    squads: list[dict[str, Any]] | None,
+    user_squad_uuids: set[str],
+    nodes: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]] | None:
+    """Hosts whose inbound the user can reach, with the reason each is or is not shown.
+
+    Remnawave puts a host into the subscription when its inbound belongs to one of the
+    user's active squads, the host is enabled, not hidden, and its squad filter
+    (``internalSquads``: EXCLUDE / ALLOW_ONLY) lets the user through.
+    """
+    if hosts is None or squads is None:
+        return None
+    inbound_tags: dict[str, str] = {}
+    user_inbounds: set[str] = set()
+    for squad in squads:
+        for inbound in squad.get("inbounds") or []:
+            if not isinstance(inbound, dict):
+                continue
+            uuid = str(inbound.get("uuid"))
+            inbound_tags[uuid] = str(inbound.get("tag") or "")
+            if str(squad.get("uuid")) in user_squad_uuids:
+                user_inbounds.add(uuid)
+    rows = []
+    for host in sorted(hosts, key=lambda h: int(h.get("viewPosition") or 0)):
+        raw_inbound = host.get("inbound")
+        inbound_uuid = str(
+            (raw_inbound or {}).get("configProfileInboundUuid")
+            if isinstance(raw_inbound, dict)
+            else host.get("inboundUuid")
+        )
+        if inbound_uuid not in user_inbounds:
+            continue
+        rule = host.get("internalSquads") if isinstance(host.get("internalSquads"), dict) else {}
+        mode = str(rule.get("mode") or "EXCLUDE").upper()
+        listed = {str(x) for x in rule.get("squads") or []}
+        if host.get("isDisabled"):
+            state = "disabled"
+        elif mode == "ALLOW_ONLY" and not listed & user_squad_uuids:
+            state = "not_allowed"
+        elif mode == "EXCLUDE" and listed & user_squad_uuids:
+            state = "excluded"
+        elif host.get("isHidden"):
+            state = "hidden"
+        else:
+            state = "visible"
+        host_nodes = [nodes[str(n)] for n in host.get("nodes") or [] if str(n) in nodes]
+        rows.append(
+            {
+                "remark": host.get("remark"),
+                "address": host.get("address"),
+                "port": host.get("port"),
+                "inbound": inbound_tags.get(inbound_uuid, ""),
+                "tags": [str(t) for t in host.get("tags") or []],
+                "template": bool(host.get("xrayJsonTemplateUuid")),
+                "state": state,
+                "nodes": [
+                    {
+                        "name": node.get("name"),
+                        "country": node.get("countryCode"),
+                        "online": bool(node.get("isConnected")),
+                    }
+                    for node in host_nodes
+                ],
+            }
+        )
+    return rows
 
 
 def _node_usage(stats: Any) -> list[dict[str, Any]]:
@@ -253,9 +339,14 @@ def _build(shop: dict[str, Any], panel: dict[str, Any] | None) -> dict[str, Any]
     last_node_uuid = traffic.get("lastConnectedNodeUuid") or pu.get("lastConnectedNodeUuid")
     last_node = nodes.get(str(last_node_uuid)) if last_node_uuid else None
     online_at = _parse_dt(traffic.get("onlineAt") or pu.get("onlineAt"))
-    squads = [
-        squad.get("name") for squad in pu.get("activeInternalSquads") or [] if isinstance(squad, dict)
-    ]
+    active_squads = [s for s in pu.get("activeInternalSquads") or [] if isinstance(s, dict)]
+    squads = [squad.get("name") for squad in active_squads]
+    hosts = _host_rows(
+        panel.get("hosts"),
+        panel.get("squads"),
+        {str(squad.get("uuid")) for squad in active_squads},
+        nodes,
+    )
     devices = [
         {
             "platform": device.get("platform"),
@@ -321,6 +412,7 @@ def _build(shop: dict[str, Any], panel: dict[str, Any] | None) -> dict[str, Any]
         "sub_revoked_at": pu.get("subRevokedAt"),
         "squads": squads,
         "accessible_nodes": accessible,
+        "hosts": hosts,
         "usage_month": _node_usage(panel.get("bandwidth_month")),
         "usage_week": _node_usage(panel.get("bandwidth_week")),
         "devices": devices,
@@ -334,6 +426,8 @@ def _build(shop: dict[str, Any], panel: dict[str, Any] | None) -> dict[str, Any]
         warn("error", "В панели нет ни одного сквада: подключаться некуда")
     if not accessible and isinstance(raw_accessible, dict):
         warn("error", "Нет доступных нод (ни один сквад не активен на нодах)")
+    if hosts is not None and squads and not any(h["state"] == "visible" for h in hosts):
+        warn("error", "В подписке нет ни одного видимого хоста: клиент получит пустой список")
     offline = [node["name"] for node in accessible if not node["online"]]
     if offline:
         warn("warn", "Недоступны ноды: " + ", ".join(str(n) for n in offline))
@@ -387,7 +481,7 @@ def _dumps(value: Any) -> str:
 
 class KiroDiagnosticsPlugin(Plugin):
     name = PLUGIN_ID
-    version = "1.0.1"
+    version = "1.1.0"
     plugin_api_min_version = 1
     plugin_api_max_version = 1
 

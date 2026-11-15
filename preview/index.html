@@ -29,6 +29,14 @@
         { name: "Node 1", country: "NL", online: true, inbounds: ["HYSTERIA2", "HYSTERIA2_SALAMANDER", "VLESS_XHTTP_REALITY"] },
         { name: "Node 2", country: "FI", online: true, inbounds: ["HYSTERIA2", "HYSTERIA2_SALAMANDER", "VLESS_XHTTP_REALITY"] },
       ],
+      hosts: [
+        { remark: "🤖 Авто", address: "nl1.example.com", port: 443, inbound: "VLESS_XHTTP_REALITY", tags: ["XHTTP"], template: true, state: "visible", nodes: [{ name: "Node 1", country: "NL", online: true }] },
+        { remark: "🇳🇱 Нидерланды", address: "nl1.example.com", port: 443, inbound: "VLESS_XHTTP_REALITY", tags: ["XHTTP"], template: false, state: "visible", nodes: [{ name: "Node 1", country: "NL", online: true }] },
+        { remark: "🇫🇮 Финляндия WIFI", address: "fi1.example.com", port: 8443, inbound: "HYSTERIA2_SALAMANDER", tags: [], template: false, state: "visible", nodes: [{ name: "Node 2", country: "FI", online: false }] },
+        { remark: "🇫🇮 Финляндия (пул)", address: "fi1.example.com", port: 443, inbound: "VLESS_XHTTP_REALITY", tags: [], template: false, state: "hidden", nodes: [] },
+        { remark: "🇫🇮 Финляндия · XHTTP (статус)", address: "fi1.example.com", port: 443, inbound: "VLESS_XHTTP_REALITY", tags: [], template: false, state: "disabled", nodes: [] },
+        { remark: "🇩🇪 Белые списки", address: "de.example.com", port: 443, inbound: "VLESS_XHTTP_REALITY", tags: [], template: false, state: "not_allowed", nodes: [] },
+      ],
       usage_week: [], usage_month: [], hwid_limit: 5,
       devices: [
         { platform: "Android", os: "16", model: "Pixel 8", app: "INCY/3.7.0/android Dalvik/2.1.0", last_seen: ago(21) },

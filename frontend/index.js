@@ -70,6 +70,13 @@ const STYLE = `
 .kd-btn:disabled{opacity:.5;cursor:default}
 .kd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px;min-width:0}
 .kd-grid>*{min-width:0}
+.kd-st{display:inline-block;padding:1px 6px;border-radius:6px;font-size:12px;white-space:nowrap}
+.kd-st-ok{background:rgba(48,164,108,.15);color:#30a46c}
+.kd-st-off{background:rgba(229,72,77,.12);color:#e5484d}
+.kd-st-muted{background:rgba(127,127,127,.15);color:var(--muted)}
+.kd-dim td{opacity:.7}
+.kd-wide{grid-column:1/-1}
+.kd-bad-text{color:#e5484d}
 `;
 
 function render(data) {
@@ -115,6 +122,31 @@ function render(data) {
           .join("")}</table>`
       : `<span class="kd-muted">Нет доступных нод</span>`;
 
+    const HOST_STATE = {
+      visible: ["в подписке", "kd-st-ok"],
+      hidden: ["скрыт (пул)", "kd-st-muted"],
+      disabled: ["выключен", "kd-st-off"],
+      excluded: ["исключён сквадом", "kd-st-off"],
+      not_allowed: ["не его сквад", "kd-st-off"],
+    };
+    const hostRows = p.hosts || [];
+    const visibleCount = hostRows.filter((h) => h.state === "visible").length;
+    const hosts =
+      p.hosts == null
+        ? `<span class="kd-muted">Панель не вернула хосты или сквады</span>`
+        : hostRows.length
+          ? `<table class="kd-table"><tr><th>Хост</th><th>Адрес · инбаунд</th><th>Состояние</th></tr>${hostRows
+              .map((h) => {
+                const [label, cls] = HOST_STATE[h.state] || [h.state, "kd-st-muted"];
+                const nodes = (h.nodes || [])
+                  .map((n) => `${flag(n.country)} ${esc(n.name)}${n.online ? "" : ' <span class="kd-bad-text">офлайн</span>'}`)
+                  .join(", ");
+                const tags = (h.tags || []).map((t) => `<span class="kd-tag">${esc(t)}</span>`).join("");
+                return `<tr class="${h.state === "visible" ? "" : "kd-dim"}"><td>${esc(h.remark || "—")}${h.template ? ' <span class="kd-tag">шаблон</span>' : ""}${nodes ? `<br><span class="kd-muted">${nodes}</span>` : ""}</td><td><span class="kd-nw">${esc(h.address || "—")}${h.port ? ":" + esc(h.port) : ""}</span><br><span class="kd-tag">${esc(h.inbound || "?")}</span>${tags}</td><td><span class="kd-st ${cls}">${esc(label)}</span></td></tr>`;
+              })
+              .join("")}</table>`
+          : `<span class="kd-muted">Нет хостов на доступных инбаундах</span>`;
+
     const usage = (rows) =>
       rows && rows.length
         ? `<table class="kd-table">${rows.map((r) => `<tr><td>${flag(r.country)} ${esc(r.name)}</td><td style="text-align:right">${gib(r.bytes)}</td></tr>`).join("")}</table>`
@@ -134,6 +166,7 @@ function render(data) {
 
     panelCards = `${panelCard}
       <div class="kd-card"><h4>Доступные ноды и инбаунды</h4>${accessible}</div>
+      <div class="kd-card kd-wide"><h4>Хосты в подписке${p.hosts ? ` (${visibleCount} из ${hostRows.length})` : ""}</h4>${hosts}</div>
       <div class="kd-card"><h4>Трафик по нодам: 7 дней</h4>${usage(p.usage_week)}<h4 style="margin-top:10px">С начала месяца</h4>${usage(p.usage_month)}</div>
       <div class="kd-card"><h4>Устройства (HWID ${esc((p.devices || []).length)}${p.hwid_limit ? " / " + esc(p.hwid_limit) : ""})</h4>${devices}</div>
       <div class="kd-card"><h4>Запросы подписки</h4>${history}</div>`;
